@@ -69,8 +69,10 @@ public class Main {
 
     static boolean compareStringWithMap(String s1, String s2) {
 
-
-        Thread thread1 = new Thread() {
+        /**
+         * with thread, it slow as a snail :D
+         */
+        /*Thread thread1 = new Thread() {
             public void run() {
                 putStringToCharMap(s1, mapS1);
             }
@@ -91,7 +93,11 @@ public class Main {
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
+        }*/
+
+        putStringToCharMap(s1, mapS1);
+        putStringToCharMap(s2, mapS2);
+
         if (mapS1.equals(mapS2)) {
             mapS1.clear();
             mapS2.clear();
@@ -103,14 +109,61 @@ public class Main {
         }
     }
 
+    static ArrayList<String> getLengthRangeLimitedList(List<String> list, int limit, String text){
+        ArrayList<String> assorted = new ArrayList<>();
+        /**
+         * example: abbba
+         * a,b,b,a --> 4db
+         * ab,bb,ba --> 3db
+         * abb, bba --> 2db
+         * describes the given lengthLimit
+         * on how many different ranges occurs
+         */
+        int lastTraveledRangeQuantity = 0;
+
+        for (int i = 0; i < limit-1; i++){
+            lastTraveledRangeQuantity += text.length() - i;
+        }
+
+        int needToTravel = text.length() - limit +1;
+
+        for(int i = lastTraveledRangeQuantity; i < lastTraveledRangeQuantity+needToTravel; i++){
+            if(list.get(i).length() == limit){
+                assorted.add(list.get(i));
+            }
+        }
+
+        return assorted;
+    }
+
     static int sherlockAndAnagrams(String s) {
         int totalAnagrams = 0;
         for (int i = 1; i < s.length(); i++) {
             textWindows.addAll(getWordsByActualRange(s, i));
         }
-        initializeMap(textWindows, textRangeCounter);
+        //initializeMap(textWindows, textRangeCounter);
 
-        for (int i = 0; i < textWindows.size() - 1; i++) {
+        ArrayList<String> sorted;
+
+        for (int i = 1; i < s.length(); i++){
+            sorted = getLengthRangeLimitedList(textWindows, i, s);
+            for (int j = 0; j < sorted.size() - 1; j++) {
+                String slow = sorted.get(j);
+                for (int k = j + 1; k < sorted.size(); k++) {
+                    String fast = sorted.get(k);
+                    if (compareStringWithMap(slow, fast)) {
+                        totalAnagrams++;
+                    }
+                }
+            }
+            sorted.clear();
+        }
+
+
+        /**
+         *  second solution
+         */
+        /*for (int i = 0; i < textWindows.size() - 1; i++) {
             String slow = textWindows.get(i);
             for (int j = i + 1; j < textWindows.size(); j++) {
                 String fast = textWindows.get(j);
@@ -120,7 +173,8 @@ public class Main {
                     }
                 }
             }
-        }
+        }*/
+
         textWindows.clear();
         textRangeCounter.clear();
         return totalAnagrams;
